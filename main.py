@@ -10,6 +10,7 @@ from pathlib import Path
 from aiogram import Bot, Dispatcher, types
 from aiogram.client.default import DefaultBotProperties
 from aiogram.exceptions import TelegramBadRequest, TelegramEntityTooLarge, TelegramRetryAfter
+from aiogram.types import LinkPreviewOptions
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.media_group import MediaGroupBuilder
 from aiogram.enums import ParseMode
@@ -215,7 +216,8 @@ async def post_product_description(product: Product, chat_id: str = "792197327",
     post_id = await bot.send_message(chat_id=chat_id,
                                      text=product.compose_description(),
                                      reply_markup=keyboard,
-                                     request_timeout=150)
+                                     request_timeout=150,
+                                     link_preview_options=LinkPreviewOptions(is_disabled=True))
     post_id = post_id.message_id
 
     log_post_product_description(logger, product)  # Logging

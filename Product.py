@@ -91,8 +91,7 @@ class Product:
                         f"Артикул: {self.code}\n"
                         f"Цена, руб.: {self.price}")
 
-        return desc
-
+        return desc + "\n\n<a href='https://max.ru/join/UlqMNnYO2n-INRTQ1xtxF8fq4hEWowp4SqxWSs056Cc'>Канал в МАКС</a>"
 
     def compose_buy_link(self) -> str:
         """Returns the link leading to the product page"""
