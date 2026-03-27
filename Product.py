@@ -97,13 +97,14 @@ class Product:
     def compose_buy_link(self) -> str:
         """Returns the link leading to the product page"""
 
-        return f"https://tkaniti.ru/goods/{self.uuid}"
+        return f"https://tkaniti.ru/goods/{self.uuid}?utm_source=tg_channel"
 
 
     def compose_buy_keyboard(self) -> InlineKeyboardMarkup:
         """Returns a keyboard markup containing a buy button"""
 
         builder = InlineKeyboardBuilder()
+        builder.add(InlineKeyboardButton(text="Быстрый просмотр фото и видео", url=self.compose_buy_link()))
         builder.add(InlineKeyboardButton(text="Заказать", url=self.compose_buy_link()))
         keyboard = builder.as_markup()
 
