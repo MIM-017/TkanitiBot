@@ -30,22 +30,22 @@ dp = Dispatcher()
 products_to_post = []
 
 
-@dp.message(Command("upload"))
-async def upload(msg: types.Message, command: CommandObject):
-    if command.args is None:
+@dp.message()
+async def upload(msg: types.Message):
+    if msg.text is None:
         await msg.reply("Не указан артикул товара для загрузки. \n"
-                        "Пришлите команду в формате /upload <UUID ТОВАРА>, "
-                        "например  /upload 044A38E5", parse_mode=ParseMode.MARKDOWN)
+                        "Пришлите команду в формате <UUID ТОВАРА>, "
+                        "например 044A38E5", parse_mode=ParseMode.MARKDOWN)
 
         log_upload_command_wrong_uuid(logger, msg.text)  # Logging
 
-    elif not requests.get(f"https://api.tkaniti.ru/store/goods/u/{command.args}").ok:
+    elif not requests.get(f"https://api.tkaniti.ru/store/goods/u/{msg.text}").ok:
         await msg.answer("UUID товара не обнаружен, возможно товар уже продан")
 
-        log_upload_command_nonexistent_product(logger, command.args)  # Logging
+        log_upload_command_nonexistent_product(logger, msg.text)  # Logging
 
     else:
-        uuid = command.args
+        uuid = msg.text
         if check_post(uuid):
             keyboard_builder = InlineKeyboardBuilder()
             keyboard_builder.add(types.InlineKeyboardButton(text="Всё равно выложить", callback_data="post" + uuid))
@@ -54,10 +54,10 @@ async def upload(msg: types.Message, command: CommandObject):
             await msg.answer("Согласно базе данных, товар с данным артикулом уже был выложен",
                              reply_markup=keyboard_builder.as_markup())
         else:
-            product = Product(command.args)
+            product = Product(msg.text)
             await post_product(product, chat_id=POST_TO_ID, force_post=True)
 
-        log_upload_command_successful(logger, command.args)  # Logging
+        log_upload_command_successful(logger, msg.text)  # Logging
 
 
 @dp.callback_query()
