@@ -1,0 +1,12 @@
+.venv
+test.txt
+text.py
+__pycache__
+.idea
+temp/
+logs.txt
+START.bat
+config.py
+posted.txt
+.git.zip
+tests/posted.txt
