@@ -1,3 +1,5 @@
+from itertools import product
+
 import requests
 import time
 import asyncio
@@ -87,7 +89,7 @@ async def force_upload(callback: types.CallbackQuery):
 
 def compose(uuid: str, status: Literal["new", "restock", "sold"] = "new") -> str:
     if status == "sold":
-        return "📍Закончился📍"
+        return "📍Товар продан📍"
     else:
         product = Product(uuid)
         return product.compose_description()
@@ -232,17 +234,28 @@ async def post_product_media(product: Product, chat_id: str = "792197327"):
 
     product.download_all_media(Path("./temp"))
 
-    count = 0
-    for index in range(len(product.images)):
-        if count == 10:
-            break
-        media_group.add_photo(types.FSInputFile(f"temp/photo{index}.jpg"))
-        count += 1
+    if len(product.images) > 3:
+        photos_indeces = [len(product.images)-1, 0, 1]
+        for index in photos_indeces:
+            media_group.add_photo(types.FSInputFile(f"temp/photo{index}.jpg"))
+    else:
+        for index in range(len(product.images)):
+            media_group.add_photo(types.FSInputFile(f"temp/photo{index}.jpg"))
 
-    for index in range(len(product.videos)):
-        if count == 10:
-            break
-        media_group.add_video(types.FSInputFile(f"temp/video{index}.mp4"))
+    if len(product.videos) > 0:
+        media_group.add_video(types.FSInputFile(f"temp/video{0}.mp4"))
+
+    # count = 0
+    # for index in range(len(product.images)):
+    #     if count == 10:
+    #         break
+    #     media_group.add_photo(types.FSInputFile(f"temp/photo{index}.jpg"))
+    #     count += 1
+
+    # for index in range(len(product.videos)):
+    #     if count == 10:
+    #         break
+    #     media_group.add_video(types.FSInputFile(f"temp/video{index}.mp4"))
 
 
     await bot.send_media_group(chat_id=chat_id, media=media_group.build(), request_timeout=150)

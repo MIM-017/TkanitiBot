@@ -3,6 +3,7 @@ from requests import get
 from json import loads
 from enum import Enum
 from pathlib import Path
+from aiogram import html
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
@@ -74,9 +75,8 @@ class Product:
                 density = f"Плотность, гр/м2: {self.density}\n" if hasattr(self, "density") else ""
                 length = f"Длина: {self.length}\n" if hasattr(self, "length") else ""
 
-                desc = (f"Бренд: {self.brand}\n"
-                        f"Название: {self.name}\n"
-                        f"Характеристика: {self.description}\n"
+                desc = (f"Описание: {html.bold(self.brand + ' / ' + self.name)}\n"
+                        # f"Характеристика: {self.description}\n"
                         f"{density}"
                         f"Состав: {self.composition}\n"
                         f"Ширина, см: {self.width}\n"
@@ -85,9 +85,8 @@ class Product:
                         f"Артикул: {self.code}")
 
             case _:
-                desc = (f"Бренд: {self.brand}\n"
-                        f"Название: {self.name}\n"
-                        f"Характеристика: {self.description}\n"
+                desc = (f"Описание: {html.bold(self.brand + ' / ' + self.name)}\n"
+                        # f"Характеристика: {self.description}\n"
                         f"Артикул: {self.code}\n"
                         f"Цена, руб.: {self.price}")
 
@@ -103,7 +102,7 @@ class Product:
         """Returns a keyboard markup containing a buy button"""
 
         builder = InlineKeyboardBuilder()
-        builder.add(InlineKeyboardButton(text="Быстрый просмотр фото и видео", url=self.compose_buy_link()))
+        builder.add(InlineKeyboardButton(text="Больше фото/описание", url=self.compose_buy_link()))
         builder.add(InlineKeyboardButton(text="Заказать", url=self.compose_buy_link()))
         keyboard = builder.as_markup()
 
