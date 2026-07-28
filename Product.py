@@ -29,6 +29,7 @@ class Product:
         # Common fields
         self.uuid = product["uuid"]
         self.name = product["name"]
+        self.remains = product["remains"]
         self.description = product["description"]
         self.code = product["code"]
         self.price = product["price"]
