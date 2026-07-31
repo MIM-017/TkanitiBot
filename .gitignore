@@ -10,3 +10,4 @@ config.py
 posted.txt
 .git.zip
 tests/posted.txt
+test.py
