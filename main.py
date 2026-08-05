@@ -410,7 +410,7 @@ async def perpetual_product_repost():
                 uuid, post_id, status = line.split(":")
                 if status == "AVL\n" and post_id != "NONE":
                     product = Product(uuid)
-                    if product.remains != 0 and product.remains is not None:
+                    if product.remains != 0 and product.remains != "0.00" and product.remains is not None:
                         await post_product(Product(uuid), POST_TO_ID, force_post=True)
                 else:
                     continue
