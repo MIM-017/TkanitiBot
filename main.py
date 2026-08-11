@@ -14,7 +14,6 @@ from aiogram.types import LinkPreviewOptions
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.media_group import MediaGroupBuilder
 from aiogram.enums import ParseMode
-from aiogram.filters.command import Command, CommandObject
 
 from logs import *
 from Product import Product
@@ -438,6 +437,8 @@ async def perpetual_product_repost():
                     product = Product(uuid)
                     if product.remains != 0 and product.remains != "0.00" and product.remains is not None:
                         await post_product(Product(uuid), POST_TO_ID, force_post=True)
+                    else:
+                        continue
                 else:
                     continue
 
