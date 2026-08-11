@@ -1,12 +1,9 @@
-from itertools import product
-
 import requests
 import time
 import asyncio
+import ffmpeg
 
-from json import loads
 from typing import Literal
-from pprint import pp
 from pathlib import Path
 from datetime import datetime
 
@@ -86,6 +83,29 @@ async def force_upload(callback: types.CallbackQuery):
     else:
 
         await bot.edit_message_reply_markup(chat_id=chat_id, message_id=message_id, reply_markup=None)
+
+
+def get_video_metadata(path: str | Path) -> dict | None:
+    for stream in ffmpeg.probe(path)["streams"]:
+        if stream["codec_type"] == "video":
+            return {"width": stream["width"],
+                    "height": stream["height"],
+                    "duration": float(stream["duration"])}
+
+
+def generate_thumbnail(in_filename, out_filename, height = 300) -> bool:
+    try:
+        (
+            ffmpeg
+            .input(in_filename)
+            .filter('scale', -1, height)
+            .output(out_filename, vframes=1)
+            .overwrite_output()
+            .run(capture_stdout=True, capture_stderr=True)
+        )
+        return True
+    except ffmpeg.Error as e:
+        return False
 
 
 def compose(uuid: str, status: Literal["new", "restock", "sold"] = "new") -> str:
@@ -243,8 +263,14 @@ async def post_product_media(product: Product, chat_id: str = "792197327"):
         for index in range(len(product.images)):
             media_group.add_photo(types.FSInputFile(f"temp/photo{index}.jpg"))
 
+    metadata = get_video_metadata("temp/video0.mp4")
+    thumbnail = generate_thumbnail("temp/video0.mp4", "temp/thumbnail.jpg")
     if len(product.videos) > 0:
-        media_group.add_video(types.FSInputFile(f"temp/video{0}.mp4"))
+        media_group.add_video(types.FSInputFile(f"temp/video{0}.mp4"),
+                              width= metadata["width"] if metadata else None,
+                              height= metadata["height"] if metadata else None,
+                              duration= int(metadata["duration"]) if metadata else None,
+                              thumbnail=types.FSInputFile(f"temp/thumbnail.jpg") if thumbnail else None)
 
     # count = 0
     # for index in range(len(product.images)):
@@ -428,44 +454,3 @@ if __name__ == "__main__":
     asyncio.run(run())
     pass
 
-# This is the old post_product method
-
-# async def post_product(product, chat_id: str, force_post: int = 0):
-#     uuid = product["uuid"]
-#     product = requests.get(f"https://api.tkaniti.ru/store/goods/u/{uuid}").json()["data"]
-#     msg = compose(uuid)
-#     pp(product)
-#     if "image" in product.keys():
-#         img = product["image"]
-#         get_photo(img, saved_file_name="single_photo")
-#     else:
-#         imgs = [product["images"][x]["filename"] for x in range(len(product["images"]))]
-#         for x in range(len(product["images"])):
-#             get_photo(file_name=imgs[x], saved_file_name=f"photo{x}")
-#
-#     if "videos" in product.keys() and len(product["videos"]) > 0:
-#         vid = product["videos"][0]["filename"]
-#         get_video(vid)
-#
-#
-#     if not check_post(uuid) or force_post:
-#         media_group = MediaGroupBuilder(caption=msg)
-#
-#         if "videos" in product.keys() and len(product["videos"]) > 0:
-#             media_group.add_video(types.FSInputFile(f"temp/video"))
-#
-#         if "image" in product.keys():
-#             media_group.add_photo(types.FSInputFile("temp/single_photo"))
-#             post_id = await post(text=msg, chat_id=chat_id, mode="mg", media_group=media_group)
-#         else:
-#             for x in range(min(9, len(product["images"]))):
-#                 media_group.add_photo(types.FSInputFile(f"temp/photo{x}"))
-#             post_id = await post(text=msg, chat_id=chat_id, mode="mg", media_group=media_group)
-#
-#         if not check_post(uuid):
-#             with open("posted.txt", "a") as posted:
-#                 posted.write(f"{uuid}:{post_id}:{'AVL'}\n")
-#                 # posted.write(uuid + ":" + str(post_id) + "\n")
-
-# Tkaniti id -1001741435947
-# MY ID 792197327
