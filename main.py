@@ -1,3 +1,4 @@
+import random
 import requests
 import time
 import asyncio
@@ -420,29 +421,28 @@ async def main():
         await asyncio.sleep(60)
 
 async def perpetual_product_repost():
-    """This is in infinitely running coroutine that is responsible for constantly reposting the products"""
+    """This is an infinitely running coroutine that is responsible for constantly reposting the products"""
 
     while True:
         with open("posted.txt", "r") as posted:
-            for line in posted.readlines():
+            line = random.choice(posted.readlines())
+            current_hour = datetime.now().hour
 
-                current_hour = datetime.now().hour
+            if current_hour not in range(10, 19 + 1):
+                await asyncio.sleep(60 * 60)
+                continue
 
-                if current_hour not in range(10, 19 + 1):
-                    await asyncio.sleep(60 * 60)
-                    continue
-
-                uuid, post_id, status = line.split(":")
-                if status == "AVL\n" and post_id != "NONE":
-                    product = Product(uuid)
-                    if product.remains != 0 and product.remains != "0.00" and product.remains is not None:
-                        await post_product(Product(uuid), POST_TO_ID, force_post=True)
-                    else:
-                        continue
+            uuid, post_id, status = line.split(":")
+            if status == "AVL\n" and post_id != "NONE":
+                product = Product(uuid)
+                if product.remains != 0 and product.remains != "0.00" and product.remains is not None:
+                    await post_product(Product(uuid), POST_TO_ID, force_post=True)
                 else:
                     continue
+            else:
+                continue
 
-                await asyncio.sleep(60 * 60)  # 60-min intervals here
+            await asyncio.sleep(60 * 60)  # 60-min intervals here
 
 async def run():
     await asyncio.gather(main(),
