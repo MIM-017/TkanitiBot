@@ -133,7 +133,7 @@ class Product:
 
     @staticmethod
     def _get_photo(file_name: str, path: Path, saved_file_name: str = "photo"):
-        img = get(f"https://cdn.tkaniti.ru/store/image/{file_name}", timeout=50).content
+        img = get(f"https://cdn.tkaniti.ru/store/image/{file_name}", timeout=120).content
         if not path.is_dir():
             path.mkdir(parents=True)
         with open(path / saved_file_name, "wb") as photo:
@@ -142,7 +142,7 @@ class Product:
 
     @staticmethod
     def _get_video(file_name: str, path: Path, saved_file_name: str = "video"):
-        vid = get(f"https://cdn.tkaniti.ru/store/videos/{file_name}/mp4", timeout=50).content
+        vid = get(f"https://cdn.tkaniti.ru/store/videos/{file_name}/mp4", timeout=120).content
         if not path.is_dir():
             path.mkdir(parents=True)
         with open(path / saved_file_name, "wb") as video:

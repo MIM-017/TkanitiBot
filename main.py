@@ -15,6 +15,7 @@ from aiogram.types import LinkPreviewOptions
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.media_group import MediaGroupBuilder
 from aiogram.enums import ParseMode
+from requests import HTTPError, ReadTimeout, ConnectionError
 
 from logs import *
 from Product import Product
@@ -434,10 +435,14 @@ async def perpetual_product_repost():
 
             uuid, post_id, status = line.split(":")
             if status == "AVL\n" and post_id != "NONE":
-                product = Product(uuid)
-                if product.remains != 0 and product.remains != "0.00" and product.remains is not None:
-                    await post_product(Product(uuid), POST_TO_ID, force_post=True)
-                else:
+                try:
+                    product = Product(uuid)
+                    if product.remains != 0 and product.remains != "0.00" and product.remains is not None:
+                        await post_product(Product(uuid), POST_TO_ID, force_post=True)
+                    else:
+                        continue
+                except (HTTPError, ReadTimeout) as e:
+                    await log_error(logger, f"Ошибка при автоматической перевыкладке товара, {e}", bot)
                     continue
             else:
                 continue
